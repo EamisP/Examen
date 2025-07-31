@@ -1,7 +1,6 @@
-
-
 using SQLite;
 using System;
+using Microsoft.Maui.Controls;
 
 namespace Examen.Models
 {
@@ -21,5 +20,8 @@ namespace Examen.Models
         public double Longitud { get; set; }
 
         public string FotoBase64 { get; set; }
+
+        [Ignore]
+        public ImageSource FotoImagen { get; set; }
     }
 }

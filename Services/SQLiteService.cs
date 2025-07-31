@@ -87,8 +87,11 @@ namespace Examen.Services
 
         public Task<List<Asistencia>> GetAsistenciasPorFechaAsync(DateTime fecha)
         {
+            var inicio = fecha.Date;
+            var fin = inicio.AddDays(1);
+
             return _db.Table<Asistencia>()
-                .Where(a => a.FechaHora.Date == fecha.Date)
+                .Where(a => a.FechaHora >= inicio && a.FechaHora < fin)
                 .OrderByDescending(a => a.FechaHora)
                 .ToListAsync();
         }

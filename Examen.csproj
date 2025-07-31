@@ -24,7 +24,7 @@
 		<ApplicationTitle>Examen</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.examen</ApplicationId>
+		<ApplicationId>com.upbc.examen</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>

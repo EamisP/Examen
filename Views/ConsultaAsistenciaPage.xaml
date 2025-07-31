@@ -33,7 +33,7 @@
                             <Image
                                 Aspect="AspectFit"
                                 HeightRequest="200"
-                                Source="{Binding FotoBase64}" />
+                                Source="{Binding FotoImagen}" />
                         </StackLayout>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

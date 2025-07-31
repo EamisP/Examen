@@ -35,7 +35,7 @@ namespace Examen.Views
                 if (!string.IsNullOrEmpty(item.FotoBase64))
                 {
                     byte[] imageBytes = Convert.FromBase64String(item.FotoBase64);
-                    item.FotoBase64 = ImageSource.FromStream(() => new System.IO.MemoryStream(imageBytes)).ToString();
+                    item.FotoImagen = ImageSource.FromStream(() => new System.IO.MemoryStream(imageBytes));
                 }
             }
 
