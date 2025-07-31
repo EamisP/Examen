@@ -1,0 +1,44 @@
+<ContentPage
+    x:Class="Examen.Views.ConsultaAsistenciaPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sys="clr-namespace:System;assembly=netstandard"
+    Title="Consulta de Asistencias">
+
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="15">
+
+            <Label
+                FontAttributes="Bold"
+                FontSize="20"
+                HorizontalOptions="Center"
+                Text="Consultar Asistencias por Fecha" />
+
+            <DatePicker x:Name="FechaPicker" MaximumDate="{x:Static sys:DateTime.Today}" />
+
+            <Button Clicked="OnConsultarClicked" Text="Consultar" />
+
+            <CollectionView x:Name="AsistenciasCollection">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout
+                            Margin="0,5"
+                            Padding="10"
+                            BackgroundColor="#f0f0f0">
+                            <Label FontAttributes="Bold" Text="{Binding Nombre}" />
+                            <Label Text="{Binding Matricula}" />
+                            <Label Text="{Binding FechaHora, StringFormat='Fecha: {0:dd/MM/yyyy HH:mm}'}" />
+                            <Label Text="{Binding Latitud, StringFormat='Latitud: {0}'}" />
+                            <Label Text="{Binding Longitud, StringFormat='Longitud: {0}'}" />
+                            <Image
+                                Aspect="AspectFit"
+                                HeightRequest="200"
+                                Source="{Binding FotoBase64}" />
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

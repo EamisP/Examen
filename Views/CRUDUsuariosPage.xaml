@@ -1,0 +1,62 @@
+<ContentPage
+    x:Class="Examen.Views.CRUDUsuariosPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Gestión de Usuarios">
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="10">
+
+            <Label
+                FontAttributes="Bold"
+                FontSize="20"
+                HorizontalOptions="Center"
+                Text="Registro de Usuario" />
+
+            <Entry x:Name="MatriculaEntry" Placeholder="Matrícula" />
+            <Entry x:Name="NombreEntry" Placeholder="Nombre" />
+            <Entry x:Name="ApellidosEntry" Placeholder="Apellidos" />
+
+            <StackLayout Orientation="Horizontal">
+                <Label Text="¿Es Administrador?" VerticalOptions="Center" />
+                <Switch x:Name="AdminSwitch" HorizontalOptions="EndAndExpand" />
+            </StackLayout>
+
+            <Button Clicked="OnGuardarClicked" Text="Guardar Usuario" />
+            <Button
+                BackgroundColor="#ccc"
+                Clicked="OnLimpiarClicked"
+                Text="Limpiar"
+                TextColor="Black" />
+
+            <Label
+                Margin="0,20,0,10"
+                FontAttributes="Bold"
+                FontSize="18"
+                Text="Usuarios Registrados" />
+
+            <CollectionView
+                x:Name="UsuariosCollection"
+                SelectionChanged="OnUsuarioSeleccionado"
+                SelectionMode="Single">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout
+                            Margin="0,5"
+                            Padding="10"
+                            BackgroundColor="#f0f0f0">
+                            <Label FontAttributes="Bold" Text="{Binding Matricula}" />
+                            <Label Text="{Binding Nombre}" />
+                            <Label Text="{Binding Apellidos}" />
+                            <Label Text="{Binding EsAdministrador, StringFormat='Administrador: {0}'}" />
+                            <Button
+                                Clicked="OnEliminarClicked"
+                                CommandParameter="{Binding .}"
+                                Text="Eliminar" />
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,67 @@
+<ContentPage
+    x:Class="Examen.Views.CRUDUbicacionesPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Ubicaciones Permitidas">
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="15">
+
+            <Label
+                FontAttributes="Bold"
+                FontSize="20"
+                HorizontalOptions="Center"
+                Text="Nueva Ubicación" />
+
+            <Entry x:Name="NombreLugarEntry" Placeholder="Nombre del lugar" />
+            <Entry
+                x:Name="LatitudEntry"
+                Keyboard="Numeric"
+                Placeholder="Latitud" />
+            <Entry
+                x:Name="LongitudEntry"
+                Keyboard="Numeric"
+                Placeholder="Longitud" />
+            <Entry
+                x:Name="RadioEntry"
+                Keyboard="Numeric"
+                Placeholder="Radio (metros)" />
+
+            <Button Clicked="OnGuardarClicked" Text="Guardar Ubicación" />
+            <Button
+                BackgroundColor="#ccc"
+                Clicked="OnLimpiarClicked"
+                Text="Limpiar"
+                TextColor="Black" />
+
+            <Label
+                Margin="0,20,0,10"
+                FontAttributes="Bold"
+                FontSize="18"
+                Text="Ubicaciones Registradas" />
+
+            <CollectionView
+                x:Name="UbicacionesCollection"
+                SelectionChanged="OnSeleccionado"
+                SelectionMode="Single">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout
+                            Margin="0,5"
+                            Padding="10"
+                            BackgroundColor="#f0f0f0">
+                            <Label FontAttributes="Bold" Text="{Binding NombreLugar}" />
+                            <Label Text="{Binding Latitud, StringFormat='Latitud: {0}'}" />
+                            <Label Text="{Binding Longitud, StringFormat='Longitud: {0}'}" />
+                            <Label Text="{Binding RadioMetros, StringFormat='Radio: {0} m'}" />
+                            <Button
+                                Clicked="OnEliminarClicked"
+                                CommandParameter="{Binding .}"
+                                Text="Eliminar" />
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

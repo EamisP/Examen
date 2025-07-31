@@ -1,0 +1,26 @@
+<ContentPage
+    x:Class="Examen.Views.AdminPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Administrador">
+
+    <ScrollView>
+        <StackLayout
+            Padding="20"
+            Spacing="20"
+            VerticalOptions="Center">
+
+            <Label
+                FontSize="24"
+                HorizontalOptions="Center"
+                Text="Panel de Administración" />
+
+            <Button Clicked="OnUsuariosClicked" Text="Gestionar Usuarios" />
+
+            <Button Clicked="OnUbicacionesClicked" Text="Gestionar Ubicaciones" />
+
+            <Button Clicked="OnAsistenciasClicked" Text="Consultar Asistencias" />
+
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

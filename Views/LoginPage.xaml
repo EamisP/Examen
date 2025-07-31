@@ -1,0 +1,39 @@
+<ContentPage
+    x:Class="Examen.Views.LoginPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Inicio de Sesión">
+
+    <StackLayout
+        Padding="20"
+        Spacing="15"
+        VerticalOptions="Center">
+
+        <Label
+            FontSize="18"
+            HorizontalOptions="Center"
+            Text="Ingrese su matrículas" />
+
+        <Entry
+            x:Name="MatriculaEntry"
+            HorizontalOptions="FillAndExpand"
+            Keyboard="Numeric"
+            Placeholder="Matrícula" />
+
+        <Button
+            x:Name="BtnRegistrar"
+            Clicked="OnRegistrarClicked"
+            HorizontalOptions="FillAndExpand"
+            Text="Registrar Asistencia" />
+
+        <Button
+            x:Name="BtnAdmin"
+            BackgroundColor="#888"
+            Clicked="OnAdminClicked"
+            HorizontalOptions="FillAndExpand"
+            Text="Ir a panel de administración"
+            TextColor="White" />
+
+    </StackLayout>
+
+</ContentPage>
