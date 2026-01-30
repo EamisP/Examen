@@ -67,7 +67,7 @@ namespace Examen.Views
 
                 if (distancia * 1000 > ubicacionPermitida.RadioMetros)
                 {
-                    MensajeLabel.Text = "Fuera del área autorizada. No se registró asistencia.";
+                    MensajeLabel.Text = $"Fuera del área autorizada. No se registró asistencia. Lat: {location.Latitude}, Lon: {location.Longitude}, Distancia: {distancia * 1000:F2}m";
                     MensajeLabel.TextColor = Colors.Red;
                     return;
                 }
