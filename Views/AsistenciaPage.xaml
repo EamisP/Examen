@@ -13,16 +13,45 @@
                 HorizontalOptions="Center"
                 Text="Registro de Asistencia" />
 
+            <!--  Correo corporativo  -->
             <Label
-                x:Name="NombreLabel"
+                x:Name="CorreoLabel"
                 FontSize="18"
-                Text="Nombre del usuario" />
-            <Label
-                x:Name="MatriculaLabel"
-                FontSize="18"
-                Text="Matrícula" />
+                Text="Correo: " />
 
-            <Button Clicked="OnRegistrarAsistenciaClicked" Text="Registrar Asistencia" />
+            <!--  Indicador de modo debug  -->
+            <Label
+                x:Name="DebugModeLabel"
+                FontSize="12"
+                IsVisible="False"
+                Text="⚠️ MODO DEBUG ACTIVO"
+                TextColor="Orange" />
+
+            <!--  Selector de tipo de registro  -->
+            <Label FontSize="16" Text="Tipo de registro:" />
+            <Picker
+                x:Name="TipoRegistroPicker"
+                Title="Selecciona tipo"
+                HorizontalOptions="FillAndExpand">
+                <Picker.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>ENTRADA</x:String>
+                        <x:String>SALIDA</x:String>
+                    </x:Array>
+                </Picker.ItemsSource>
+            </Picker>
+
+            <Button
+                x:Name="BtnRegistrar"
+                Clicked="OnRegistrarAsistenciaClicked"
+                Text="Registrar Asistencia" />
+
+            <!--  Indicador de carga  -->
+            <ActivityIndicator
+                x:Name="LoadingIndicator"
+                IsRunning="False"
+                IsVisible="False"
+                Color="#512BD4" />
 
             <Label
                 x:Name="MensajeLabel"

@@ -12,13 +12,21 @@
         <Label
             FontSize="18"
             HorizontalOptions="Center"
-            Text="Ingrese su matrículas" />
+            Text="Ingresa tu correo corporativo" />
 
         <Entry
-            x:Name="MatriculaEntry"
+            x:Name="CorreoEntry"
             HorizontalOptions="FillAndExpand"
-            Keyboard="Numeric"
-            Placeholder="Matrícula" />
+            Keyboard="Email"
+            Placeholder="ejemplo@exploraie.com" />
+
+        <!--  Label para mostrar errores de validación  -->
+        <Label
+            x:Name="ErrorLabel"
+            FontSize="14"
+            IsVisible="False"
+            Text=""
+            TextColor="Red" />
 
         <Button
             x:Name="BtnRegistrar"

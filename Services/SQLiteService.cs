@@ -1,3 +1,15 @@
+/*
+ * ============================================================================
+ * CÓDIGO OBSOLETO - SQLite reemplazado por Google Sheets API
+ * ============================================================================
+ * Este servicio ya no se usa para la funcionalidad principal de asistencia.
+ * La nueva implementación usa SheetsService.cs
+ * 
+ * Mantenido por compatibilidad con las páginas de administración (CRUD).
+ * TODO: Migrar las páginas de administración a Google Sheets si es necesario.
+ * ============================================================================
+ */
+
 using SQLite;
 using System.IO;
 using System.Threading.Tasks;
@@ -9,6 +21,10 @@ using System.Linq;
 
 namespace Examen.Services
 {
+    /// <summary>
+    /// [LEGACY] Servicio de SQLite - Usado solo para páginas de administración
+    /// Para asistencia, usar SheetsService.cs
+    /// </summary>
     public class SQLiteService
     {
         private SQLiteAsyncConnection _db;
@@ -75,16 +91,23 @@ namespace Examen.Services
             return _db.DeleteAsync(ubicacion);
         }
 
+        // ============================================================================
+        // MÉTODOS OBSOLETOS - La asistencia ahora se guarda en Google Sheets
+        // ============================================================================
+
+        [Obsolete("Usar SheetsService.RegistrarAsistenciaAsync en su lugar")]
         public Task<int> InsertarAsistenciaAsync(Asistencia asistencia)
         {
             return _db.InsertAsync(asistencia);
         }
 
+        [Obsolete("Usar SheetsService.GetRegistrosHoyAsync en su lugar")]
         public Task<List<Asistencia>> GetAsistenciasAsync()
         {
             return _db.Table<Asistencia>().OrderByDescending(a => a.FechaHora).ToListAsync();
         }
 
+        [Obsolete("Usar SheetsService para consultas de asistencia")]
         public Task<List<Asistencia>> GetAsistenciasPorFechaAsync(DateTime fecha)
         {
             var inicio = fecha.Date;

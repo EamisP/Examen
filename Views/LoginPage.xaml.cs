@@ -1,6 +1,5 @@
-
-
 using Microsoft.Maui.Controls;
+using Examen.Services;
 
 namespace Examen.Views
 {
@@ -10,25 +9,36 @@ namespace Examen.Views
         {
             InitializeComponent();
         }
+
         private async void OnRegistrarClicked(object sender, EventArgs e)
         {
-            var matricula = MatriculaEntry.Text?.Trim();
+            var correo = CorreoEntry.Text?.Trim();
 
-            if (string.IsNullOrEmpty(matricula))
+            // Ocultar error previo
+            ErrorLabel.IsVisible = false;
+
+            // Validación: no vacío
+            if (string.IsNullOrWhiteSpace(correo))
             {
-                await DisplayAlert("Error", "Por favor ingrese su matrícula.", "OK");
+                ShowError("Por favor ingresa tu correo corporativo.");
                 return;
             }
 
-            // Simulación: matrícula válida si contiene al menos 4 caracteres
-            if (matricula.Length < 4)
+            // Validación: debe terminar en @exploraie.com
+            if (!SheetsService.ValidarCorreoCorporativo(correo))
             {
-                await DisplayAlert("No encontrado", "Matrícula no registrada.", "OK");
+                ShowError("El correo debe terminar en @exploraie.com");
                 return;
             }
 
-            // Aquí podrías guardar matrícula temporalmente con Shell.Current.GoToAsync
-            await Shell.Current.GoToAsync("//AsistenciaPage?matricula=" + matricula);
+            // Navegar a la página de asistencia con el correo
+            await Shell.Current.GoToAsync("//AsistenciaPage?correo=" + Uri.EscapeDataString(correo));
+        }
+
+        private void ShowError(string mensaje)
+        {
+            ErrorLabel.Text = mensaje;
+            ErrorLabel.IsVisible = true;
         }
 
         private async void OnAdminClicked(object sender, EventArgs e)
