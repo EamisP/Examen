@@ -19,6 +19,20 @@
                 FontSize="18"
                 Text="Correo: " />
 
+            <!--  Estado actual del registro  -->
+            <Frame
+                x:Name="EstadoFrame"
+                Padding="15"
+                BackgroundColor="#E8F5E9"
+                BorderColor="#4CAF50"
+                CornerRadius="10">
+                <Label
+                    x:Name="EstadoLabel"
+                    FontSize="16"
+                    HorizontalTextAlignment="Center"
+                    Text="Cargando estado..." />
+            </Frame>
+
             <!--  Indicador de modo debug  -->
             <Label
                 x:Name="DebugModeLabel"
@@ -26,20 +40,6 @@
                 IsVisible="False"
                 Text="⚠️ MODO DEBUG ACTIVO"
                 TextColor="Orange" />
-
-            <!--  Selector de tipo de registro  -->
-            <Label FontSize="16" Text="Tipo de registro:" />
-            <Picker
-                x:Name="TipoRegistroPicker"
-                Title="Selecciona tipo"
-                HorizontalOptions="FillAndExpand">
-                <Picker.ItemsSource>
-                    <x:Array Type="{x:Type x:String}">
-                        <x:String>ENTRADA</x:String>
-                        <x:String>SALIDA</x:String>
-                    </x:Array>
-                </Picker.ItemsSource>
-            </Picker>
 
             <Button
                 x:Name="BtnRegistrar"

@@ -34,8 +34,8 @@ namespace Examen.Services
         private static string SpreadsheetId => DebugMode ? DEBUG_SPREADSHEET_ID : PROD_SPREADSHEET_ID;
         private static string CredentialsFileName => DebugMode ? DEBUG_CREDENTIALS_FILE : PROD_CREDENTIALS_FILE;
 
-        private static SheetsService _instance;
-        private Google.Apis.Sheets.v4.SheetsService _sheetsApi;
+        private static SheetsService? _instance;
+        private Google.Apis.Sheets.v4.SheetsService? _sheetsApi;
         private bool _initialized = false;
 
         // ========================= SINGLETON =========================
@@ -128,7 +128,18 @@ namespace Examen.Services
         }
 
         /// <summary>
+        /// Obtiene el SheetId de una pestaña por nombre
+        /// </summary>
+        private async Task<int?> GetSheetIdAsync(string sheetName)
+        {
+            var spreadsheet = await _sheetsApi.Spreadsheets.Get(SpreadsheetId).ExecuteAsync();
+            var sheet = spreadsheet.Sheets.FirstOrDefault(s => s.Properties.Title == sheetName);
+            return sheet?.Properties.SheetId;
+        }
+
+        /// <summary>
         /// Crea una nueva pestaña con encabezados
+        /// Nueva estructura: [Fecha, Correo, Entrada, Salida, Latitud, Longitud]
         /// </summary>
         private async Task CreateSheetWithHeadersAsync(string sheetName)
         {
@@ -148,8 +159,8 @@ namespace Examen.Services
 
             await _sheetsApi.Spreadsheets.BatchUpdate(batchRequest, SpreadsheetId).ExecuteAsync();
 
-            // 2. Agregar encabezados
-            var headers = new List<object> { "Fecha", "Hora", "Correo", "Tipo", "Latitud", "Longitud" };
+            // 2. Agregar encabezados - NUEVA ESTRUCTURA
+            var headers = new List<object> { "Fecha", "Correo", "Entrada", "Salida", "Latitud", "Longitud" };
             var range = $"{sheetName}!A1:F1";
             var valueRange = new ValueRange
             {
@@ -174,10 +185,73 @@ namespace Examen.Services
         }
 
         // ========================= OPERACIONES DE DATOS =========================
+
         /// <summary>
-        /// Registra una asistencia en Google Sheets
+        /// Resultado del estado de registro del usuario
         /// </summary>
-        public async Task<bool> RegistrarAsistenciaAsync(string correo, string tipo, double latitud, double longitud)
+        public enum EstadoRegistro
+        {
+            SinRegistro,        // No hay registro hoy - puede registrar ENTRADA
+            SoloEntrada,        // Ya tiene entrada - puede registrar SALIDA
+            EntradaYSalida      // Ya tiene ambos - no puede registrar más
+        }
+
+        /// <summary>
+        /// Obtiene el estado de registro del usuario para hoy
+        /// </summary>
+        public async Task<(EstadoRegistro estado, int? rowIndex)> GetEstadoRegistroHoyAsync(string correo)
+        {
+            if (!_initialized)
+                await InitAsync();
+
+            var sheetName = GetCurrentMonthSheetName();
+
+            // Si no existe la pestaña del mes, no hay registros
+            if (!await SheetExistsAsync(sheetName))
+                return (EstadoRegistro.SinRegistro, null);
+
+            var today = DateTime.Now.ToString("yyyy-MM-dd");
+            var range = $"{sheetName}!A:D"; // Fecha, Correo, Entrada, Salida
+
+            var getRequest = _sheetsApi.Spreadsheets.Values.Get(SpreadsheetId, range);
+            var response = await getRequest.ExecuteAsync();
+
+            if (response.Values == null)
+                return (EstadoRegistro.SinRegistro, null);
+
+            // Buscar registro del correo en la fecha de hoy
+            for (int i = 1; i < response.Values.Count; i++) // Skip header (index 0)
+            {
+                var row = response.Values[i];
+                if (row.Count >= 2)
+                {
+                    var fecha = row[0]?.ToString();
+                    var correoRow = row[1]?.ToString();
+
+                    if (fecha == today && correoRow?.Equals(correo, StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        // Encontramos registro de hoy
+                        var entrada = row.Count > 2 ? row[2]?.ToString() : "";
+                        var salida = row.Count > 3 ? row[3]?.ToString() : "";
+
+                        if (!string.IsNullOrWhiteSpace(entrada) && !string.IsNullOrWhiteSpace(salida))
+                            return (EstadoRegistro.EntradaYSalida, i + 1); // +1 porque Sheets es 1-indexed
+
+                        if (!string.IsNullOrWhiteSpace(entrada))
+                            return (EstadoRegistro.SoloEntrada, i + 1);
+
+                        return (EstadoRegistro.SinRegistro, i + 1);
+                    }
+                }
+            }
+
+            return (EstadoRegistro.SinRegistro, null);
+        }
+
+        /// <summary>
+        /// Registra la ENTRADA del usuario (crea nueva fila)
+        /// </summary>
+        public async Task<bool> RegistrarEntradaAsync(string correo, double latitud, double longitud)
         {
             if (!_initialized)
                 await InitAsync();
@@ -194,13 +268,13 @@ namespace Examen.Services
             var sheetName = GetCurrentMonthSheetName();
             var now = DateTime.Now;
 
-            // Crear fila de datos
+            // Crear fila de datos: [Fecha, Correo, Entrada, Salida(vacío), Latitud, Longitud]
             var rowData = new List<object>
             {
                 now.ToString("yyyy-MM-dd"),
-                now.ToString("HH:mm:ss"),
                 correo,
-                tipo,
+                now.ToString("HH:mm:ss"),
+                "", // Salida vacía
                 latitud.ToString("F6", CultureInfo.InvariantCulture),
                 longitud.ToString("F6", CultureInfo.InvariantCulture)
             };
@@ -220,93 +294,67 @@ namespace Examen.Services
         }
 
         /// <summary>
-        /// Verifica si el usuario ya tiene un registro de cierto tipo hoy
+        /// Registra la SALIDA del usuario (actualiza fila existente)
         /// </summary>
-        public async Task<bool> TieneRegistroHoyAsync(string correo, string tipo)
+        public async Task<bool> RegistrarSalidaAsync(string correo, int rowIndex, double latitud, double longitud)
         {
             if (!_initialized)
                 await InitAsync();
 
-            var sheetName = GetCurrentMonthSheetName();
-
-            // Si no existe la pestaña del mes, no hay registros
-            if (!await SheetExistsAsync(sheetName))
-                return false;
-
-            var today = DateTime.Now.ToString("yyyy-MM-dd");
-            var range = $"{sheetName}!A:D"; // Fecha, Hora, Correo, Tipo
-
-            var getRequest = _sheetsApi.Spreadsheets.Values.Get(SpreadsheetId, range);
-            var response = await getRequest.ExecuteAsync();
-
-            if (response.Values == null)
-                return false;
-
-            // Buscar si existe un registro del mismo correo, tipo y fecha de hoy
-            foreach (var row in response.Values.Skip(1)) // Skip header
+            // Verificar conectividad
+            if (!await HasInternetConnectionAsync())
             {
-                if (row.Count >= 4)
-                {
-                    var fecha = row[0]?.ToString();
-                    var correoRow = row[2]?.ToString();
-                    var tipoRow = row[3]?.ToString();
-
-                    if (fecha == today &&
-                        correoRow?.Equals(correo, StringComparison.OrdinalIgnoreCase) == true &&
-                        tipoRow?.Equals(tipo, StringComparison.OrdinalIgnoreCase) == true)
-                    {
-                        return true;
-                    }
-                }
+                throw new Exception("No hay conexión a internet. No se puede registrar la asistencia.");
             }
 
-            return false;
+            var sheetName = GetCurrentMonthSheetName();
+            var now = DateTime.Now;
+
+            // Actualizar solo la columna de Salida (columna D = índice 4)
+            var range = $"{sheetName}!D{rowIndex}";
+            var valueRange = new ValueRange
+            {
+                Values = new List<IList<object>> { new List<object> { now.ToString("HH:mm:ss") } }
+            };
+
+            var updateRequest = _sheetsApi.Spreadsheets.Values.Update(valueRange, SpreadsheetId, range);
+            updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.RAW;
+
+            await updateRequest.ExecuteAsync();
+            return true;
         }
 
         /// <summary>
-        /// Obtiene todos los registros del día actual
+        /// Método principal para registrar asistencia automáticamente
+        /// Detecta si debe registrar entrada o salida
         /// </summary>
-        public async Task<List<AsistenciaRecord>> GetRegistrosHoyAsync()
+        public async Task<(bool exito, string mensaje)> RegistrarAsistenciaAutoAsync(string correo, double latitud, double longitud)
         {
             if (!_initialized)
                 await InitAsync();
 
-            var registros = new List<AsistenciaRecord>();
-            var sheetName = GetCurrentMonthSheetName();
+            var (estado, rowIndex) = await GetEstadoRegistroHoyAsync(correo);
 
-            if (!await SheetExistsAsync(sheetName))
-                return registros;
-
-            var today = DateTime.Now.ToString("yyyy-MM-dd");
-            var range = $"{sheetName}!A:F";
-
-            var getRequest = _sheetsApi.Spreadsheets.Values.Get(SpreadsheetId, range);
-            var response = await getRequest.ExecuteAsync();
-
-            if (response.Values == null)
-                return registros;
-
-            foreach (var row in response.Values.Skip(1))
+            switch (estado)
             {
-                if (row.Count >= 4)
-                {
-                    var fecha = row[0]?.ToString();
-                    if (fecha == today)
-                    {
-                        registros.Add(new AsistenciaRecord
-                        {
-                            Fecha = fecha,
-                            Hora = row.Count > 1 ? row[1]?.ToString() : "",
-                            Correo = row.Count > 2 ? row[2]?.ToString() : "",
-                            Tipo = row.Count > 3 ? row[3]?.ToString() : "",
-                            Latitud = row.Count > 4 ? row[4]?.ToString() : "",
-                            Longitud = row.Count > 5 ? row[5]?.ToString() : ""
-                        });
-                    }
-                }
-            }
+                case EstadoRegistro.SinRegistro:
+                    await RegistrarEntradaAsync(correo, latitud, longitud);
+                    return (true, $"✅ ENTRADA registrada a las {DateTime.Now:HH:mm:ss}");
 
-            return registros;
+                case EstadoRegistro.SoloEntrada:
+                    if (rowIndex.HasValue)
+                    {
+                        await RegistrarSalidaAsync(correo, rowIndex.Value, latitud, longitud);
+                        return (true, $"✅ SALIDA registrada a las {DateTime.Now:HH:mm:ss}");
+                    }
+                    return (false, "Error: No se encontró el registro de entrada.");
+
+                case EstadoRegistro.EntradaYSalida:
+                    return (false, "⚠️ Ya tienes registrada ENTRADA y SALIDA hoy. Contacta a un administrador si necesitas hacer cambios.");
+
+                default:
+                    return (false, "Error desconocido.");
+            }
         }
 
         // ========================= UTILIDADES =========================
@@ -344,11 +392,11 @@ namespace Examen.Services
     /// </summary>
     public class AsistenciaRecord
     {
-        public string Fecha { get; set; }
-        public string Hora { get; set; }
-        public string Correo { get; set; }
-        public string Tipo { get; set; }
-        public string Latitud { get; set; }
-        public string Longitud { get; set; }
+        public string? Fecha { get; set; }
+        public string? Correo { get; set; }
+        public string? Entrada { get; set; }
+        public string? Salida { get; set; }
+        public string? Latitud { get; set; }
+        public string? Longitud { get; set; }
     }
 }

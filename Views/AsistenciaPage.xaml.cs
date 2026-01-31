@@ -11,7 +11,7 @@ namespace Examen.Views
     {
         private SheetsService _sheetsService;
         private CameraService camara;
-        private string correoActual;
+        private string? correoActual;
 
         public AsistenciaPage()
         {
@@ -21,17 +21,82 @@ namespace Examen.Views
 
             // Mostrar indicador de modo debug si está activo
             DebugModeLabel.IsVisible = SheetsService.DebugMode;
-
-            // Seleccionar ENTRADA por defecto
-            TipoRegistroPicker.SelectedIndex = 0;
         }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.ContainsKey("correo"))
             {
-                correoActual = query["correo"].ToString();
-                CorreoLabel.Text = $"Correo: {correoActual}";
+                // Decodificar el correo (arregla el %40 -> @)
+                var correoValue = query["correo"]?.ToString();
+                if (!string.IsNullOrEmpty(correoValue))
+                {
+                    correoActual = Uri.UnescapeDataString(correoValue);
+                    CorreoLabel.Text = $"Correo: {correoActual}";
+
+                    // Cargar el estado del registro
+                    _ = CargarEstadoRegistroAsync();
+                }
+            }
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            if (!string.IsNullOrWhiteSpace(correoActual))
+            {
+                _ = CargarEstadoRegistroAsync();
+            }
+        }
+
+        private async Task CargarEstadoRegistroAsync()
+        {
+            if (string.IsNullOrWhiteSpace(correoActual))
+                return;
+
+            try
+            {
+                SetLoading(true);
+                await _sheetsService.InitAsync();
+
+                var (estado, _) = await _sheetsService.GetEstadoRegistroHoyAsync(correoActual);
+
+                switch (estado)
+                {
+                    case SheetsService.EstadoRegistro.SinRegistro:
+                        EstadoLabel.Text = "📋 Sin registro hoy\nPresiona el botón para registrar tu ENTRADA";
+                        EstadoFrame.BackgroundColor = Color.FromArgb("#E3F2FD"); // Azul claro
+                        EstadoFrame.BorderColor = Color.FromArgb("#2196F3");
+                        BtnRegistrar.Text = "Registrar ENTRADA";
+                        BtnRegistrar.IsEnabled = true;
+                        break;
+
+                    case SheetsService.EstadoRegistro.SoloEntrada:
+                        EstadoLabel.Text = "✅ ENTRADA registrada\nPresiona el botón para registrar tu SALIDA";
+                        EstadoFrame.BackgroundColor = Color.FromArgb("#FFF3E0"); // Naranja claro
+                        EstadoFrame.BorderColor = Color.FromArgb("#FF9800");
+                        BtnRegistrar.Text = "Registrar SALIDA";
+                        BtnRegistrar.IsEnabled = true;
+                        break;
+
+                    case SheetsService.EstadoRegistro.EntradaYSalida:
+                        EstadoLabel.Text = "🎉 ENTRADA y SALIDA registradas\nYa completaste tu registro de hoy.\nContacta a un administrador si necesitas cambios.";
+                        EstadoFrame.BackgroundColor = Color.FromArgb("#E8F5E9"); // Verde claro
+                        EstadoFrame.BorderColor = Color.FromArgb("#4CAF50");
+                        BtnRegistrar.Text = "Registro Completo";
+                        BtnRegistrar.IsEnabled = false;
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                EstadoLabel.Text = $"Error al cargar estado: {ex.Message}";
+                EstadoFrame.BackgroundColor = Color.FromArgb("#FFEBEE");
+                EstadoFrame.BorderColor = Color.FromArgb("#F44336");
+            }
+            finally
+            {
+                SetLoading(false);
             }
         }
 
@@ -44,17 +109,9 @@ namespace Examen.Views
                 return;
             }
 
-            if (TipoRegistroPicker.SelectedIndex < 0)
-            {
-                MensajeLabel.Text = "Por favor selecciona el tipo de registro (ENTRADA/SALIDA).";
-                MensajeLabel.TextColor = Colors.Red;
-                return;
-            }
-
-            var tipoRegistro = TipoRegistroPicker.SelectedItem?.ToString() ?? "ENTRADA";
-
             // Mostrar indicador de carga
             SetLoading(true);
+            MensajeLabel.Text = "";
 
             try
             {
@@ -70,24 +127,7 @@ namespace Examen.Views
                 // 2. Inicializar servicio de Sheets
                 await _sheetsService.InitAsync();
 
-                // 3. Verificar si ya tiene registro del mismo tipo hoy
-                bool yaRegistrado = await _sheetsService.TieneRegistroHoyAsync(correoActual, tipoRegistro);
-                if (yaRegistrado)
-                {
-                    bool continuar = await DisplayAlert(
-                        "Advertencia",
-                        $"Ya tienes un registro de {tipoRegistro} hoy. ¿Deseas registrar otro?",
-                        "Sí, registrar",
-                        "Cancelar");
-
-                    if (!continuar)
-                    {
-                        SetLoading(false);
-                        return;
-                    }
-                }
-
-                // 4. Obtener ubicación
+                // 3. Obtener ubicación
                 var location = await Geolocation.GetLastKnownLocationAsync() ?? await Geolocation.GetLocationAsync();
                 if (location == null)
                 {
@@ -97,8 +137,8 @@ namespace Examen.Views
                     return;
                 }
 
-                // 5. Tomar foto (opcional - si falla, continúa sin foto)
-                string fotoBase64 = null;
+                // 4. Tomar foto (opcional - si falla, continúa sin foto)
+                string? fotoBase64 = null;
                 try
                 {
                     fotoBase64 = await camara.TomarFotoComoBase64Async();
@@ -109,24 +149,26 @@ namespace Examen.Views
                     // Continuar sin foto
                 }
 
-                // 6. Registrar en Google Sheets
-                await _sheetsService.RegistrarAsistenciaAsync(
+                // 5. Registrar en Google Sheets (automáticamente detecta entrada/salida)
+                var (exito, mensaje) = await _sheetsService.RegistrarAsistenciaAutoAsync(
                     correoActual,
-                    tipoRegistro,
                     location.Latitude,
                     location.Longitude);
 
-                // 7. Mostrar éxito
-                MensajeLabel.TextColor = Colors.Green;
-                MensajeLabel.Text = $"✅ {tipoRegistro} registrada correctamente a las {DateTime.Now:HH:mm:ss}";
+                // 6. Mostrar resultado
+                MensajeLabel.TextColor = exito ? Colors.Green : Colors.Orange;
+                MensajeLabel.Text = mensaje;
 
-                // Mostrar foto si se capturó
+                // 7. Mostrar foto si se capturó
                 if (!string.IsNullOrEmpty(fotoBase64))
                 {
                     FotoImage.Source = ImageSource.FromStream(() =>
                         new System.IO.MemoryStream(Convert.FromBase64String(fotoBase64)));
                     FotoImage.IsVisible = true;
                 }
+
+                // 8. Recargar estado
+                await CargarEstadoRegistroAsync();
             }
             catch (Exception ex)
             {
@@ -145,7 +187,6 @@ namespace Examen.Views
             LoadingIndicator.IsRunning = isLoading;
             LoadingIndicator.IsVisible = isLoading;
             BtnRegistrar.IsEnabled = !isLoading;
-            TipoRegistroPicker.IsEnabled = !isLoading;
         }
     }
 }
