@@ -64,7 +64,7 @@ namespace Examen.Views
                 switch (estado)
                 {
                     case SheetsService.EstadoRegistro.SinRegistro:
-                        EstadoLabel.Text = "📋 Sin registro hoy\nPresiona el botón para registrar tu ENTRADA";
+                        EstadoLabel.Text = "Sin registro hoy\nPresiona el botón para registrar tu ENTRADA";
                         EstadoFrame.BackgroundColor = Color.FromArgb("#E3F2FD"); // Azul claro
                         EstadoFrame.BorderColor = Color.FromArgb("#2196F3");
                         BtnRegistrar.Text = "Registrar ENTRADA";
@@ -72,7 +72,7 @@ namespace Examen.Views
                         break;
 
                     case SheetsService.EstadoRegistro.SoloEntrada:
-                        EstadoLabel.Text = "✅ ENTRADA registrada\nPresiona el botón para registrar tu SALIDA";
+                        EstadoLabel.Text = "ENTRADA registrada\nPresiona el botón para registrar tu SALIDA";
                         EstadoFrame.BackgroundColor = Color.FromArgb("#FFF3E0"); // Naranja claro
                         EstadoFrame.BorderColor = Color.FromArgb("#FF9800");
                         BtnRegistrar.Text = "Registrar SALIDA";
@@ -80,7 +80,7 @@ namespace Examen.Views
                         break;
 
                     case SheetsService.EstadoRegistro.EntradaYSalida:
-                        EstadoLabel.Text = "🎉 ENTRADA y SALIDA registradas\nYa completaste tu registro de hoy.\nContacta a un administrador si necesitas cambios.";
+                        EstadoLabel.Text = "ENTRADA y SALIDA registradas\nYa completaste tu registro de hoy.\nContacta a un administrador si necesitas cambios.";
                         EstadoFrame.BackgroundColor = Color.FromArgb("#E8F5E9"); // Verde claro
                         EstadoFrame.BorderColor = Color.FromArgb("#4CAF50");
                         BtnRegistrar.Text = "Registro Completo";

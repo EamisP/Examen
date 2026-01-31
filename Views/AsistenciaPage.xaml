@@ -38,7 +38,7 @@
                 x:Name="DebugModeLabel"
                 FontSize="12"
                 IsVisible="False"
-                Text="⚠️ MODO DEBUG ACTIVO"
+                Text="MODO DEBUG ACTIVO"
                 TextColor="Orange" />
 
             <Button
