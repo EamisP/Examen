@@ -2,3 +2,4 @@
 obj/
 bin/
 *.user
+Resources/Raw/credenciales_debug.json
