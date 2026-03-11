@@ -21,7 +21,7 @@ namespace Examen.Services
         public static bool DebugMode = true;
 
         // SpreadsheetId para debug/pruebas
-        private const string DEBUG_SPREADSHEET_ID = "1wkoiENU6aSPuLgZWOnGuP7sGn73K4wSTD9S0heDG18k";
+        private const string DEBUG_SPREADSHEET_ID = "1QuAi075e_yClOvpuQJ_5ioArjvAmnrm8PIOsck3XsKQ";
 
         // SpreadsheetId para producción (configurar cuando esté listo)
         private const string PROD_SPREADSHEET_ID = "TU_SPREADSHEET_ID_PRODUCCION";
