@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace Examen;
+namespace ChecadorExplora;
 
 [Application]
 public class MainApplication : MauiApplication

@@ -14,12 +14,12 @@ using SQLite;
 using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Examen.Models;
+using ChecadorExplora.Models;
 using Microsoft.Maui.Storage;
 using System;
 using System.Linq;
 
-namespace Examen.Services
+namespace ChecadorExplora.Services
 {
     /// <summary>
     /// [LEGACY] Servicio de SQLite - Usado solo para páginas de administración

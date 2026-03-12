@@ -10,7 +10,7 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 
-namespace Examen.Services
+namespace ChecadorExplora.Services
 {
     public class SheetsService
     {
@@ -74,7 +74,7 @@ namespace Examen.Services
                 _sheetsApi = new Google.Apis.Sheets.v4.SheetsService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = credential,
-                    ApplicationName = "Examen Asistencia"
+                    ApplicationName = "ChecadorExplora Asistencia"
                 });
 
                 _initialized = true;

@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Examen.Services
+namespace ChecadorExplora.Services
 {
     public class CameraService
     {

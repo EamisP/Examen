@@ -1,9 +1,9 @@
 
 
 using Microsoft.Maui.Devices.Sensors;
-using Examen.Models;
+using ChecadorExplora.Models;
 
-namespace Examen.Services
+namespace ChecadorExplora.Services
 {
     public class GeoValidatorService
     {

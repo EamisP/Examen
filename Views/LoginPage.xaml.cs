@@ -1,7 +1,7 @@
 using Microsoft.Maui.Controls;
-using Examen.Services;
+using ChecadorExplora.Services;
 
-namespace Examen.Views
+namespace ChecadorExplora.Views
 {
     public partial class LoginPage : ContentPage
     {

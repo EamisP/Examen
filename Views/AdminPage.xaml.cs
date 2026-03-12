@@ -2,7 +2,7 @@
 
 using Microsoft.Maui.Controls;
 
-namespace Examen.Views
+namespace ChecadorExplora.Views
 {
     public partial class AdminPage : ContentPage
     {

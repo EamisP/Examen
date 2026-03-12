@@ -2,11 +2,11 @@ using Microsoft.Maui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Examen.Models;
-using Examen.Services;
+using ChecadorExplora.Models;
+using ChecadorExplora.Services;
 using Microsoft.Maui.Devices.Sensors;
 
-namespace Examen.Views
+namespace ChecadorExplora.Views
 {
     public partial class ConsultaAsistenciaPage : ContentPage
     {

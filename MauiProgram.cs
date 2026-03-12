@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
-namespace Examen;
+namespace ChecadorExplora;
 
 public static class MauiProgram
 {

@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace Examen.Models
+namespace ChecadorExplora.Models
 {
     public class UbicacionPermitida
     {

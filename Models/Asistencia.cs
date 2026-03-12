@@ -2,7 +2,7 @@ using SQLite;
 using System;
 using Microsoft.Maui.Controls;
 
-namespace Examen.Models
+namespace ChecadorExplora.Models
 {
     public class Asistencia
     {

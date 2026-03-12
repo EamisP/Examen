@@ -1,4 +1,4 @@
-﻿namespace Examen;
+﻿namespace ChecadorExplora;
 
 public partial class AppShell : Shell
 {
